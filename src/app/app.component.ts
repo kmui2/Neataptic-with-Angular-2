@@ -6,59 +6,132 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
-  TESTER = document.getElementById('tester');
-  ACTUAL = document.getElementById('actual');
-  NORM = document.getElementById('norm');
-  RMSE = document.getElementById('rmse');
+  TESTER: any
+  ACTUAL: any
+  NORM : any
+  RMSE : any
 
-  num_points = 100;
-  LOCV_percent = 0.8;
+  num_points: any
+  LOCV_percent : any = 0.8;
 
-  num_input_neurons = 1;
-  num_hidden_neurons = 4;
-  num_output_neurons = 1;
+  num_input_neurons: any
+  num_hidden_neurons: any
+  num_output_neurons : any
+  column_headers: any;
+  row_headers: any;
+  data_matrix:any;
+  networkObj: any;
+  
 
-  max_sin_output = this.num_input_neurons;
+  // max_sin_output = this.num_input_neurons;
 
-  start_range = 0;
-  end_range = 2*Math.PI;
+  // start_range : any
+  // end_range : any
 
 
-  x_data = _.range(this.start_range, this.end_range, (this.end_range - this.start_range)/this.num_points);
+  x_data : any
+  y_data : any
 
-  y_data = _.map(this.x_data,
-    (n) => {
-      return Math.sin(n);
-    }
-  );
+  training_options: any;
+parseMe(file) {
+  var comp = this;
+  Papa.parse(file, {
+  	   dynamicTyping: true,
+       header: false, 
+      complete: function(results) {
+          console.log("Finished:", results.data);
+          comp.start(results.data);
+      }
+  });
+}
+start(sheet) {
+  
+  this.TESTER = document.getElementById('tester');
+  this.ACTUAL = document.getElementById('actual');
+  this.NORM = document.getElementById('norm');
+  this.RMSE = document.getElementById('rmse');
+  // var networkObj = this.trainData(this.x_data, this.y_data);
+  // var y_predicted = this.getPredData(this.x_data, networkObj.network, this.y_data);
 
-  training_options = {
+  
+    this.column_headers = sheet[0].slice();
+    this.row_headers = _.map(sheet, 
+      (row) => {
+        return row[0];
+      });
+    this.data_matrix = _.map(sheet.slice(1), 
+      (row) => {
+        return row.slice(1);
+      });
+      
+    this.num_points = 100;
+    this.x_data = _.map(this.data_matrix,
+      (row) => {
+        return row[1];
+      }).slice(0,this.num_points);
+      
+    this.y_data = _.map(this.data_matrix,
+      (row) => {
+        return row[0];
+      }).slice(0,this.num_points);
+      
+    // num_points = data_matrix.length;
+    console.log(this)
+    this.num_input_neurons = 1;
+    this.num_hidden_neurons = 4;
+    this.num_output_neurons = 1;
+
+  this.training_options = {
     log: 10,
     error: 0.0000000001,
     iterations: 1000,
     rate: 0.3
   }
 
+  this.networkObj = this.trainData(this.x_data, this.y_data);
+  var y_predicted = this.getPredData(this.x_data, this.networkObj.network, this.y_data);
+  
+  document.getElementById('rmse').innerHTML = "Testing data RMSE: " + this.networkObj.testing_rmse;
+  
+  this.plot(this.y_data, y_predicted, 'Actual Y Output', 'Predicted Y Output', this.TESTER);
+  this.plot(this.x_data, y_predicted, 'X Data', 'Predicted Y Output', this.ACTUAL);
+
+}
+
   ngOnInit() {
     
-    let TESTER = document.getElementById('tester');
-    let ACTUAL = document.getElementById('actual');
-    let NORM = document.getElementById('norm');
-    let RMSE = document.getElementById('rmse');
-    var networkObj = this.trainData(this.x_data, this.y_data);
-    var y_predicted = this.getPredData(this.x_data, networkObj.network, this.y_data);
-
-    document.getElementById('rmse').innerHTML = "Testing data RMSE: " + networkObj.testing_rmse;
+    // let TESTER = document.getElementById('tester');
+    // let ACTUAL = document.getElementById('actual');
+    // let NORM = document.getElementById('norm');
+    // let RMSE = document.getElementById('rmse');
+    // var networkObj = this.trainData(this.x_data, this.y_data);
+    // var y_predicted = this.getPredData(this.x_data, networkObj.network, this.y_data);
+    // 
+    // document.getElementById('rmse').innerHTML = "Testing data RMSE: " + networkObj.testing_rmse;
+    // 
+    // // console.log("This is the tester id: " + tester); 
+    // this.plot(this.y_data, y_predicted, 'Actual Y Output', 'Predicted Y Output', TESTER);
+    // this.plot(this.x_data, y_predicted, 'X Data', 'Predicted Y Output', ACTUAL);
     
-    // console.log("This is the tester id: " + tester); 
-    this.plot(this.y_data, y_predicted, 'Actual Y Output', 'Predicted Y Output', TESTER);
-    this.plot(this.x_data, y_predicted, 'X Data', 'Predicted Y Output', ACTUAL);
-
+    var input = <HTMLInputElement>(document.getElementsByTagName('input')[0]);
+    
+    input.onclick = function () {
+        input.value = null;
+    };
+    
+    var comp = this;
+    input.onchange = function () {
+        // alert(this.value);
+        comp.parseMe(input.files[0]); 
+        
+    }; 
   }
   
 trainData(x_data, y_data) {
-  var network = new neataptic.Architect.Perceptron(this.num_input_neurons, this.num_hidden_neurons, this.num_output_neurons);
-  
+  console.log(this.num_input_neurons, this.num_hidden_neurons, this.num_output_neurons)
+  // var network = new neataptic.Architect.Perceptron(this.num_input_neurons, this.num_hidden_neurons, this.num_output_neurons);
+  var network = new neataptic.Architect.Perceptron(1,4,1);
+   
   const norm_x_data = this.norm(this.x_data);
   const norm_y_data = this.norm(this.y_data);
   // arayy of objects containing x=[1,2,..,10] and y=sin(x)
@@ -175,7 +248,10 @@ plot(x_data, y_data,xlabel,ylabel,HTML) {
   }
   Plotly.plot( HTML, [{
       x: x_data,
-      y: y_data}], layout );
+      y: y_data,
+      mode: 'markers',
+      type: 'scatter'
+    }], layout );
 }
 
 

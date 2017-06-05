@@ -100,6 +100,7 @@ start(sheet) {
   this.plot(training_y_data, training_y_predicted, 'Actual Y Output', 'Predicted Y Output', 'Training Data', this.TESTER);
   this.plot(testing_y_data, testing_y_predicted, 'Actual Y Output', 'Predicted Y Output', 'Testing Data', this.TESTER);
   this.plot(this.x_data, y_predicted, 'X Data', 'Predicted Y Output', null, this.ACTUAL);
+  this.graphHisto(this.y_data, y_predicted, 'myDiv');
   
 } 
   ngOnInit() {
@@ -247,6 +248,48 @@ plot(x_data, y_data,xlabel,ylabel,name, HTML) {
       type: 'scatter',
       name: name
     }], layout );
+}
+
+graphHisto(actual_Y, predicted_Y, htmlID) {
+  var trace1 = {
+    x: actual_Y,
+    // y: y1,
+    name: 'Actual Y Output',
+    histnorm: "count", 
+    marker: {
+      color: "rgba(255, 100, 102, 0.7)", 
+      line: {
+        color:  "rgba(255, 100, 102, 1)", 
+        width: 1
+      }
+    },  
+    opacity: 0.5, 
+    type: "histogram", 
+    nbinsx: 20
+  };
+  var trace2 = {
+    x: predicted_Y,
+    // y: y2, 
+    marker: {
+              color: "rgba(100, 200, 102, 0.7)",
+               line: {
+            color:  "rgba(100, 200, 102, 1)", 
+            width: 1
+      } 
+               }, 
+    name: "Predicted Y Output", 
+    opacity: 0.75, 
+    type: "histogram",
+    nbinsx: 20
+  };
+  var data = [trace1, trace2];
+  var layout = {
+    barmode: "overlay", 
+    title: "Comparison of Actual and Predicted Output Distributions", 
+    xaxis: {title: "Y Output Value"}, 
+    yaxis: {title: "Count"}
+  };
+  Plotly.newPlot(htmlID, data, layout);
 }
 
 

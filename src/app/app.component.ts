@@ -87,32 +87,22 @@ start(sheet) {
     iterations: 1000,
     rate: 0.3
   }
-
-  this.networkObj = this.trainData(this.x_data, this.y_data);
-  var y_predicted = this.getPredData(this.x_data, this.networkObj.network, this.y_data);
   
-  document.getElementById('rmse').innerHTML = "Testing data RMSE: " + this.networkObj.testing_rmse;
+    let network, testing_rmse, training_x_data, testing_x_data, training_y_data, testing_y_data;
+    ({network, testing_rmse, training_x_data, testing_x_data, training_y_data, testing_y_data} = this.trainData(this.x_data, this.y_data))
+    console.log(({network, testing_rmse, training_x_data, testing_x_data, training_y_data, testing_y_data}));
+  var y_predicted = this.getPredData(this.x_data, network, this.y_data);
   
-  this.plot(this.y_data, y_predicted, 'Actual Y Output', 'Predicted Y Output', this.TESTER);
-  this.plot(this.x_data, y_predicted, 'X Data', 'Predicted Y Output', this.ACTUAL);
-
-}
-
+  let testing_y_predicted = this.getPredData(testing_x_data, network, this.y_data);
+  let training_y_predicted = this.getPredData(training_x_data, network, this.y_data);
+  document.getElementById('rmse').innerHTML = "Testing data RMSE: " + testing_rmse;
+   
+  this.plot(training_y_data, training_y_predicted, 'Actual Y Output', 'Predicted Y Output', 'Training Data', this.TESTER);
+  this.plot(testing_y_data, testing_y_predicted, 'Actual Y Output', 'Predicted Y Output', 'Testing Data', this.TESTER);
+  this.plot(this.x_data, y_predicted, 'X Data', 'Predicted Y Output', null, this.ACTUAL);
+  
+} 
   ngOnInit() {
-    
-    // let TESTER = document.getElementById('tester');
-    // let ACTUAL = document.getElementById('actual');
-    // let NORM = document.getElementById('norm');
-    // let RMSE = document.getElementById('rmse');
-    // var networkObj = this.trainData(this.x_data, this.y_data);
-    // var y_predicted = this.getPredData(this.x_data, networkObj.network, this.y_data);
-    // 
-    // document.getElementById('rmse').innerHTML = "Testing data RMSE: " + networkObj.testing_rmse;
-    // 
-    // // console.log("This is the tester id: " + tester); 
-    // this.plot(this.y_data, y_predicted, 'Actual Y Output', 'Predicted Y Output', TESTER);
-    // this.plot(this.x_data, y_predicted, 'X Data', 'Predicted Y Output', ACTUAL);
-    
     var input = <HTMLInputElement>(document.getElementsByTagName('input')[0]);
     
     input.onclick = function () {
@@ -187,6 +177,10 @@ trainData(x_data, y_data) {
     (data_point) => {
       return data_point.x*(_.max(x_data)-_.min(x_data)) + _.min(x_data)
     });
+  let training_y_data = _.map(training_data,
+    (data_point) => {
+      return data_point.y*(_.max(y_data)-_.min(y_data)) - _.min(y_data)
+    });
     
     
   let testing_y_data = _.map(testing_data,
@@ -200,7 +194,7 @@ trainData(x_data, y_data) {
   
   var testing_rmse =  this.calcRMSE(testing_y_predicted,testing_y_data);
   
-  return {network, testing_rmse, training_x_data, testing_x_data};
+  return {network, testing_rmse, training_x_data, testing_x_data, training_y_data, testing_y_data};
 }
 
 norm(array) {
@@ -235,7 +229,7 @@ getPredData(input_data, network, output_data) {
   );
 }
 
-plot(x_data, y_data,xlabel,ylabel,HTML) {
+plot(x_data, y_data,xlabel,ylabel,name, HTML) {
   if (!xlabel)
     xlabel="X";
   if (!ylabel)
@@ -250,7 +244,8 @@ plot(x_data, y_data,xlabel,ylabel,HTML) {
       x: x_data,
       y: y_data,
       mode: 'markers',
-      type: 'scatter'
+      type: 'scatter',
+      name: name
     }], layout );
 }
 

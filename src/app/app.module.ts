@@ -9,7 +9,7 @@ import { MaterialModule } from '@angular/material';
 
 import { AppComponent } from './app.component';
 import { DemoComponent, DialogContent } from './components/demo/demo.component';
- 
+import { NeatapticService } from './services/neataptic/neataptic.service';
 @NgModule({
   declarations: [
     AppComponent,
@@ -24,6 +24,9 @@ import { DemoComponent, DialogContent } from './components/demo/demo.component';
     BrowserAnimationsModule
   ],
   entryComponents: [DialogContent],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
+  providers: [
+    NeatapticService
+  ]
 })
 export class AppModule {}

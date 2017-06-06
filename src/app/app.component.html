@@ -1,18 +1,6 @@
-
-  <md-toolbar color="primary">
-    
-    Angular Material2 Example App
-
-    <span class="app-toolbar-filler"></span>
-  </md-toolbar>  
+<app-navbar></app-navbar>
+<div class="content" >
   
-<label md-button class="btn btn-primary btn-file"> 
-  Upload CSV<input md-button type="file" id="file" style="display:none;" >
-</label>
-<button md-raised-button *ngIf="file" (click)="train()">Train Now</button>  
-<div id="rmse"></div> 
-<div id="tester" style="width:90%;height:250px;"></div>
-<div id="myDiv"></div>
-<div id="actual" style="width:90%;height:250px;"></div>
-<div id="norm" style="width:90%;height:250px;"></div>
+<app-train></app-train>
+</div>
 <!-- <app-demo></app-demo> -->
